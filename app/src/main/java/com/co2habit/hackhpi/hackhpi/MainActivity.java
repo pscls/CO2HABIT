@@ -18,6 +18,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,9 +31,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HistoryFragment.OnFragmentInteractionListener, AddEntryFragment.OnFragmentInteractionListener,
@@ -41,13 +44,13 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     Context context;
     private BluetoothAdapter mBluetoothAdapter;
 
+    private final String[] beacons = {"C3:FC:67:A9:54:C7", "CE:92:BD:85:DF:44", /*"C2:0D:F5:3D:BE:72",*/ "C9:C8:7C:99:3E:FD", "CD:A2:4C:60:37:C8", "F4:F0:22:16:FD:C3"};
+    ArrayList<String> scannedBeacons = new ArrayList<>();
     private boolean mScanning;
     private Handler mHandler;
 
-    private LeDeviceListAdapter mLeDeviceListAdapter;
-
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 100000;
 
 
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
@@ -57,9 +60,17 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(context, device.getAddress() + " " + rssi, Toast.LENGTH_LONG).show();
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
+                            final String deviceAddress = device.getAddress();
+                            if (Arrays.asList(beacons).contains(deviceAddress) && rssi > -80) {
+                                if (!scannedBeacons.contains(deviceAddress)) {
+                                    scannedBeacons.add(deviceAddress);
+                                    //Toast.makeText(context, deviceAddress + " " + rssi, Toast.LENGTH_LONG).show();
+
+                                    TextView text = (TextView) findViewById(R.id.bluetoothView);
+                                    text.setText(text.getText() + " ? " + rssi + " " + deviceAddress);
+                                }
+                            }
+
                         }
                     });
                 }
@@ -108,64 +119,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, 1);
             }
-        }
-    }
-
-    private class LeDeviceListAdapter extends BaseAdapter {
-        private ArrayList<BluetoothDevice> mLeDevices;
-        private LayoutInflater mInflator;
-        public LeDeviceListAdapter() {
-            super();
-            mLeDevices = new ArrayList<BluetoothDevice>();
-            mInflator = MainActivity.this.getLayoutInflater();
-        }
-        public void addDevice(BluetoothDevice device) {
-            if(!mLeDevices.contains(device)) {
-                mLeDevices.add(device);
-            }
-        }
-        public BluetoothDevice getDevice(int position) {
-            return mLeDevices.get(position);
-        }
-        public void clear() {
-            mLeDevices.clear();
-        }
-        @Override
-        public int getCount() {
-            return mLeDevices.size();
-        }
-        @Override
-        public Object getItem(int i) {
-            return mLeDevices.get(i);
-        }
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            return view;
-            /*
-            RecyclerView.ViewHolder viewHolder;
-            // General ListView optimization code.
-            if (view == null) {
-                view = mInflator.inflate(R.layout.listitem_device, null);
-                viewHolder = new ViewHolder();
-                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-                view.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) view.getTag();
-            }
-            BluetoothDevice device = mLeDevices.get(i);
-            final String deviceName = device.getName();
-            if (deviceName != null && deviceName.length() > 0)
-                viewHolder.deviceName.setText(deviceName);
-            else
-                viewHolder.deviceName.setText(R.string.unknown_device);
-            viewHolder.deviceAddress.setText(device.getAddress());
-            return view;
-            */
         }
     }
 
@@ -223,19 +176,16 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     @Override
     protected void onPause() {
         super.onPause();
-        /*Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
         scanLeDevice(false);
-        mLeDeviceListAdapter.clear();*/
     }
 
     protected void onResume() {
         super.onResume();
 
-        return;
-
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
-        /*
+
         if (!mBluetoothAdapter.isEnabled()) {
             if (!mBluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -245,11 +195,8 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
         Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
 
-        // Initializes list view adapter.
-        mLeDeviceListAdapter = new LeDeviceListAdapter();
-        //setListAdapter(mLeDeviceListAdapter);
         scanLeDevice(true);
-        */
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

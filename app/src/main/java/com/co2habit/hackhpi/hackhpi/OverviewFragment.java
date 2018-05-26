@@ -103,7 +103,7 @@ public class OverviewFragment extends Fragment {
         applyStyling(series);
 
 
-        final Handler handler = new Handler();
+       /* final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -118,7 +118,7 @@ public class OverviewFragment extends Fragment {
                 }, 2000);
 
             }
-        }, 3000);
+        }, 3000);*/
 
 
 
