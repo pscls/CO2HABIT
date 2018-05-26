@@ -3,10 +3,20 @@ package com.co2habit.hackhpi.hackhpi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -22,6 +32,11 @@ public class HistoryFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    List<HashMap<String, Object>> fillMaps;
+    SimpleAdapter adapter;
+    int smileUnicode = 0x1F60A;
+    int sadUnicode = 0x1F641;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -64,7 +79,53 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_history, container, false);
+        View view =  inflater.inflate(R.layout.fragment_history, container, false);
+
+        ListView mListView = (ListView) view.findViewById(R.id.listView);
+
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+               //         .setAction("Action", null).show();
+            }
+        });
+
+
+        String[] from = new String[] { "title", "firstDescription", "secondDescription", "colorStatus" };
+        int[] to = new int[] { R.id.title, R.id.firstDescription, R.id.secondDescription, R.id.colorStatus };
+
+
+        fillMaps = new ArrayList<>();
+
+        addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
+        addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
+
+
+        adapter = new SimpleAdapter(getActivity(), fillMaps, R.layout.row, from, to);
+        mListView.setAdapter(adapter);
+
+        return view;
+    }
+
+
+    //public method to add new elements to the list
+    public void addToList(String title, String fDescr, String sDescri, boolean status){
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("title", title); // This will be shown in R.id.title
+        map.put("firstDescription", fDescr); // And this in R.id.description
+        map.put("secondDescription", sDescri);
+
+        if(status){
+            map.put("colorStatus", new String(Character.toChars(smileUnicode)));
+        }else{
+            map.put("colorStatus", new String(Character.toChars(sadUnicode)));
+
+        }
+
+        fillMaps.add(map);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
