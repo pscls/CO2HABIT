@@ -120,10 +120,6 @@ public class OverviewFragment extends Fragment {
             }
         }, 3000);*/
 
-
-
-        Log.w("test", "hallo" + "");
-
         // Inflate the layout for this fragment
         return view;
     }

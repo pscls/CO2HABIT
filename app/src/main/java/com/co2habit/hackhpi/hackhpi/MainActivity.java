@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -44,7 +45,20 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     Context context;
     private BluetoothAdapter mBluetoothAdapter;
 
-    private final String[] beacons = {"C3:FC:67:A9:54:C7", "CE:92:BD:85:DF:44", /*"C2:0D:F5:3D:BE:72",*/ "C9:C8:7C:99:3E:FD", "CD:A2:4C:60:37:C8", "F4:F0:22:16:FD:C3"};
+    // "CD:A2:4C:60:37:C8" = JTUJ
+    // "F4:F0:22:16:FD:C3" = Sihf
+    // "C9:C8:7C:99:3E:FD" = R10J
+    // "CE:92:BD:85:DF:44" = i1tv
+    // "C3:FC:67:A9:54:C7" = qLBl
+
+    private final String elevator = "C3:FC:67:A9:54:C7"; // qLbl
+    private final String downstairs = "CE:92:BD:85:DF:44"; // i1tv
+    private final String upstairs = "C9:C8:7C:99:3E:FD"; // R10J
+    private final String bikestation = "F4:F0:22:16:FD:C3"; // Sihf
+    private final String carport = "CD:A2:4C:60:37:C8"; // JTUJ
+
+    private final String[] beaconArray = {"C3:FC:67:A9:54:C7", "CE:92:BD:85:DF:44", "C9:C8:7C:99:3E:FD", "CD:A2:4C:60:37:C8", "F4:F0:22:16:FD:C3"}; /*"C2:0D:F5:3D:BE:72",*/
+    private final ArrayList<String> beacons = new ArrayList<>(Arrays.asList(beaconArray));
     ArrayList<String> scannedBeacons = new ArrayList<>();
     private boolean mScanning;
     private Handler mHandler;
@@ -56,16 +70,31 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
-                public void onLeScan(final BluetoothDevice device,final int rssi, byte[] scanRecord) {
+                public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             final String deviceAddress = device.getAddress();
-                            if (Arrays.asList(beacons).contains(deviceAddress) && rssi > -80) {
-                                if (!scannedBeacons.contains(deviceAddress)) {
+                            if (beacons.contains(deviceAddress) && rssi > -80) {
+                                if (scannedBeacons.size() == 0 || !scannedBeacons.get(scannedBeacons.size() - 1).equals(deviceAddress)) {
+                                    if (deviceAddress.equals(elevator)) {
+                                        // add Elevator
+                                        Toast.makeText(context, "Elevator! :(", Toast.LENGTH_LONG).show();
+                                    } else if (deviceAddress.equals(bikestation)) {
+                                        // add bikestation
+                                        Toast.makeText(context, "Bikestation! :)", Toast.LENGTH_LONG).show();
+                                    } else if (deviceAddress.equals(carport)) {
+                                        // add Carport
+                                        Toast.makeText(context, "Carport! :(", Toast.LENGTH_LONG).show();
+                                    } else if (scannedBeacons.size() > 0 && (scannedBeacons.get(scannedBeacons.size() - 1).equals(downstairs) && deviceAddress.equals(upstairs) || scannedBeacons.get(scannedBeacons.size() - 1).equals(upstairs) && deviceAddress.equals(downstairs))) {
+                                        // add Stairs
+                                        Toast.makeText(context, "Stairs! :)", Toast.LENGTH_LONG).show();
+                                    }
                                     scannedBeacons.add(deviceAddress);
-                                    //Toast.makeText(context, deviceAddress + " " + rssi, Toast.LENGTH_LONG).show();
+                                }
 
+
+                                if (!scannedBeacons.contains(deviceAddress)) {
                                     TextView text = (TextView) findViewById(R.id.bluetoothView);
                                     text.setText(text.getText() + " ? " + rssi + " " + deviceAddress);
                                 }
@@ -120,6 +149,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                 startActivityForResult(enableBtIntent, 1);
             }
         }
+
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -183,6 +213,31 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     protected void onResume() {
         super.onResume();
 
+        Intent intent = getIntent();
+
+        if(intent != null)
+            Log.d("1", " " + intent.toString());
+
+        if (intent != null && NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+            Parcelable[] rawMessages =
+                    intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+            if (rawMessages != null) {
+                NdefMessage[] messages = new NdefMessage[rawMessages.length];
+                for (int i = 0; i < rawMessages.length; i++) {
+                    messages[i] = (NdefMessage) rawMessages[i];
+                }
+
+                if (messages[0].getRecords()[0].getPayload()[3] == 65) {
+                    // Add Essen A
+                } else if (messages[0].getRecords()[0].getPayload()[3] == 66) {
+                    // Add Essen B
+                }
+                // Process the messages array.
+            }
+        }
+
+
+
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
 
@@ -193,9 +248,9 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
             }
         }
 
-        Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
 
-        scanLeDevice(true);
+        scanLeDevice(false);
 
     }
 
@@ -244,30 +299,14 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             //finish();
-        } else {
-
         }
     }
 
     public void onFragmentInteraction(Uri uri) { }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (intent != null && NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
-            Toast.makeText(context, "Intent!", Toast.LENGTH_SHORT).show();
-            Parcelable[] rawMessages =
-                    intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-            if (rawMessages != null) {
-                NdefMessage[] messages = new NdefMessage[rawMessages.length];
-                for (int i = 0; i < rawMessages.length; i++) {
-                    Toast.makeText(context, rawMessages[i].toString(), Toast.LENGTH_SHORT).show();
-                    messages[i] = (NdefMessage) rawMessages[i];
-                }
-                // Process the messages array.
-            }
-        }
+    public void onNewIntent(Intent intent) {
+        setIntent(intent);
     }
 
 }
