@@ -22,10 +22,14 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
+            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+                <action android:name="com.co2habit.hackhpi.MainActivity"/>
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
