@@ -45,7 +45,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        switchFragmentBasedOnId(R.id.nav_addEntry);
+        switchFragmentBasedOnId(R.id.nav_overview);
     }
 
     @Override
