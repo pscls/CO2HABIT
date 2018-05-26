@@ -1,5 +1,6 @@
 package com.co2habit.hackhpi.hackhpi;
 
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,10 +15,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, HistoryFragment.OnFragmentInteractionListener, AddEntryFragment.OnFragmentInteractionListener,
+OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        switchFragmentBasedOnId(R.id.nav_addEntry);
     }
 
     @Override
@@ -80,31 +83,34 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+        switchFragmentBasedOnId(item.getItemId());
+        return true;
+    }
+
+    public void switchFragmentBasedOnId(int id) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
         Fragment fragment = null;
         String title = getString(R.string.app_name);
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_overview) {
+            fragment = new OverviewFragment();
+            title  = "Overview";
+        } else if (id == R.id.nav_addEntry) {
+            fragment = new AddEntryFragment();
+            title  = "Add Entry";
+        } else if (id == R.id.nav_history) {
             fragment = new HistoryFragment();
             title  = "History";
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_statistics) {
+            fragment = new StatisticsFragment();
+            title  = "Statistics";
         }
 
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.drawer_layout, fragment);
+            ft.replace(R.id.drawer_layout2, fragment);
             ft.commit();
         }
 
@@ -113,9 +119,11 @@ public class MainActivity extends AppCompatActivity
             getSupportActionBar().setTitle(title);
         }
 
-        DrawerLayout drawer = (FrameLayout) findViewById(R.id.framelayout);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+    }
 
-        return true;
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }
