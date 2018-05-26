@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.co2habit.hackhpi.hackhpi">
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-sdk android:minSdkVersion="10"/>
+    <uses-feature android:name="android.hardware.nfc" android:required="true" />
 
+
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
