@@ -1,14 +1,21 @@
 package com.co2habit.hackhpi.hackhpi;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.jjoe64.graphview.*;
 import com.jjoe64.graphview.series.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,16 +26,12 @@ import com.jjoe64.graphview.series.*;
  * create an instance of this fragment.
  */
 public class OverviewFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    int number = 4;
+
+    List<DataPoint> mockPoints = new ArrayList<DataPoint>();
+
 
     public OverviewFragment() {
         // Required empty public constructor
@@ -46,8 +49,6 @@ public class OverviewFragment extends Fragment {
     public static OverviewFragment newInstance(String param1, String param2) {
         OverviewFragment fragment = new OverviewFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,12 +56,17 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
-    }
+        //add mock data
+        this.mockPoints.add(new DataPoint(2, 3));
+        this.mockPoints.add(new DataPoint(2, -1));
+        this.mockPoints.add(new DataPoint(4, 5));
+        this.mockPoints.add(new DataPoint(4, -3));
+        this.mockPoints.add(new DataPoint(6, 3));
+        this.mockPoints.add(new DataPoint(6, -1));
+        this.mockPoints.add(new DataPoint(8, 6));
+        this.mockPoints.add(new DataPoint(8, -3));
+     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -68,21 +74,79 @@ public class OverviewFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
 
-        GraphView graph = (GraphView) view.findViewById(R.id.graph);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-          new DataPoint(0, 1),
-          new DataPoint(1, 5),
-          new DataPoint(2, 3),
-          new DataPoint(3, 2),
-          new DataPoint(4, 6)
-        });
+
+        //GUI code here
+
+        final GraphView graph = (GraphView) view.findViewById(R.id.graph);
+
+        DataPoint[] points = new DataPoint[this.mockPoints.size()];
+        points = this.mockPoints.toArray(points);
+
+        final BarGraphSeries<DataPoint> series = new BarGraphSeries<>(points);
+
+
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(10);
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(-4);
+        graph.getViewport().setMaxY(7);
+
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        graph.getGridLabelRenderer().setVerticalLabelsVisible(false);
+
 
         graph.addSeries(series);
+        graph.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
+
+        applyStyling(series);
 
 
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                appendLastDataSet(series, graph);
+
+                final Handler handler2 = new Handler();
+                handler2.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        appendLastDataSet(series, graph);
+                    }
+                }, 2000);
+
+            }
+        }, 3000);
+
+
+
+        Log.w("test", "hallo" + "");
 
         // Inflate the layout for this fragment
         return view;
+    }
+
+    public void applyStyling(BarGraphSeries<DataPoint> series) {
+        // styling
+        series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
+            @Override
+            public int get(DataPoint data) {
+                if(data.getY() < 0){
+                    return getResources().getColor(R.color.badRed);
+                }
+                else{
+                    return getResources().getColor(R.color.goodGreen);
+                }
+
+            }
+        });
+
+        series.setSpacing(50);
+        // draw values on top
+        series.setDrawValuesOnTop(true);
+        series.setValuesOnTopColor(Color.BLUE);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,6 +154,29 @@ public class OverviewFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    public void appendLastDataSet(BarGraphSeries<DataPoint> data, GraphView graph){
+        if(this.number == 4) {
+            data.appendData(new DataPoint(10, 5), false, 30);
+            this.number++;
+        }else{
+
+            //copy global mockPoints
+            List<DataPoint> localMockPoints = new ArrayList<DataPoint>(this.mockPoints);
+            localMockPoints.add(new DataPoint(10, 6));
+
+            DataPoint[] points = new DataPoint[localMockPoints.size()];
+            points = localMockPoints.toArray(points);
+
+            data.resetData(points);
+        }
+
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(12);
+        graph.getViewport().setMinY(-4);
+        graph.getViewport().setMaxY(8);
+
     }
 
     @Override

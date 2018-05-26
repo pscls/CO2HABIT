@@ -3,4 +3,6 @@
     <color name="colorPrimary">#1976d2</color>
     <color name="colorPrimaryDark">#2A4763</color>
     <color name="colorAccent">#1976d2</color>
+    <color name="goodGreen">#13EA64</color>
+    <color name="badRed">#FF4438</color>
 </resources>
