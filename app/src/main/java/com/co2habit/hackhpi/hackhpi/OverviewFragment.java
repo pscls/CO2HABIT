@@ -23,6 +23,8 @@ import com.jjoe64.graphview.series.DataPoint;
  * Use the {@link OverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
+//The ((MainActivity) getActivity()-fix is necessary because we went into issues with fragment lifecycle
 public class OverviewFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
