@@ -32,6 +32,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -64,6 +67,9 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     private final String bikestation = "F4:F0:22:16:FD:C3"; // Sihf
     private final String carport = "CD:A2:4C:60:37:C8"; // JTUJ
 
+    int y_0 = 0;
+    int y_u = 0;
+
     NfcAdapter mNfcAdapter;
 
     private final String[] beaconArray = {"C3:FC:67:A9:54:C7", "CE:92:BD:85:DF:44", "C9:C8:7C:99:3E:FD", "CD:A2:4C:60:37:C8", "F4:F0:22:16:FD:C3"}; /*"C2:0D:F5:3D:BE:72",*/
@@ -81,6 +87,46 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
     //Public Fields for Fragments!
     public ArrayList<HashMap<String, Object>> fillMaps = new ArrayList<>();
+
+    List<DataPoint> mockPoints = new ArrayList<DataPoint>();
+    BarGraphSeries<DataPoint> series;
+    int number = 4;
+
+
+    public void appendLastDataSet(boolean isPositive, int range){
+
+
+        if(isPositive){
+            y_0 += range;
+        }else{
+            y_u -= range;
+        }
+        if(this.number == 4) {
+            series.appendData(new DataPoint(10, y_0), false, 30);
+            series.appendData(new DataPoint(10, y_u), false, 30);
+            this.number++;
+        }else{
+
+            //copy global mockPoints
+            List<DataPoint> localMockPoints = new ArrayList<DataPoint>(this.mockPoints);
+            localMockPoints.add(new DataPoint(10, y_0));
+            localMockPoints.add(new DataPoint(10, y_u));
+            DataPoint[] points = new DataPoint[localMockPoints.size()];
+            points = localMockPoints.toArray(points);
+
+            series.resetData(points);
+        }
+
+        OverviewFragment overview  = (OverviewFragment) getSupportFragmentManager().findFragmentByTag("overview");
+
+        if(overview != null) {
+            overview.graph.getViewport().setMinX(0);
+            overview.graph.getViewport().setMaxX(12);
+            overview.graph.getViewport().setMinY(-4);
+            overview.graph.getViewport().setMaxY(8);
+        }
+    }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -336,9 +382,11 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                 if (messages[0].getRecords()[0].getPayload()[3] == 65) {
                     // Add Essen A
                     addToList("Meal A (Steak)", formattedDate, "140g", false);
+                    appendLastDataSet(false, 2);
                 } else if (messages[0].getRecords()[0].getPayload()[3] == 66) {
                     // Add Essen B
                     addToList("Meal B (Veggie)", formattedDate, "140g", false);
+                    appendLastDataSet(true, 3);
                 }
                 // Process the messages array.
             }
