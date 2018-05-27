@@ -1,5 +1,8 @@
 package com.co2habit.hackhpi.hackhpi;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -11,6 +14,7 @@ import android.icu.util.Calendar;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -18,6 +22,8 @@ import android.os.Bundle;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import android.support.design.widget.NavigationView;
@@ -100,6 +106,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
 
     }
+
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
@@ -113,24 +120,51 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                                 SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
                                 String formattedDate = df.format(c);
 
+                                NotificationCompat.Builder mBuilder = null;
                                 if (scannedBeacons.size() == 0 || !scannedBeacons.get(scannedBeacons.size() - 1).equals(deviceAddress)) {
                                     if (deviceAddress.equals(elevator)) {
                                         // add Elevator
                                         //Toast.makeText(context, "Elevator! :(", Toast.LENGTH_LONG).show();
                                         addToList("Used Elevator", formattedDate, "20g", false);
+                                        mBuilder = new NotificationCompat.Builder(context, "Channel 1")
+                                                .setSmallIcon(R.drawable.ic_add_sap_24dp)
+                                                .setContentTitle("Oh no!")
+                                                .setContentText("You emitted 20 g CO2 by using the elevator.")
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
                                     } else if (deviceAddress.equals(bikestation)) {
                                         // add bikestation
                                         //Toast.makeText(context, "Bikestation! :)", Toast.LENGTH_LONG).show();
                                         addToList("Used Bike", formattedDate, "-20g", true);
+                                        mBuilder = new NotificationCompat.Builder(context, "Channel 1")
+                                                .setSmallIcon(R.drawable.ic_add_sap_24dp)
+                                                .setContentTitle("Congratulations")
+                                                .setContentText("You saved 20 g CO2 by driving by bike.")
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
                                     } else if (deviceAddress.equals(carport)) {
                                         // add Carport
                                         //Toast.makeText(context, "Carport! :(", Toast.LENGTH_LONG).show();
                                         addToList("Used Car", formattedDate, "140g", false);
+                                        mBuilder = new NotificationCompat.Builder(context, "Channel 1")
+                                                .setSmallIcon(R.drawable.ic_add_sap_24dp)
+                                                .setContentTitle("Oh no!")
+                                                .setContentText("You emitted 140 g CO2 by using the car.")
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
                                     } else if (scannedBeacons.size() > 0 && (scannedBeacons.get(scannedBeacons.size() - 1).equals(downstairs) && deviceAddress.equals(upstairs) || scannedBeacons.get(scannedBeacons.size() - 1).equals(upstairs) && deviceAddress.equals(downstairs))) {
                                         // add Stairs
                                         //Toast.makeText(context, "Stairs! :)", Toast.LENGTH_LONG).show();
                                         addToList("Used Stairs", formattedDate, "-20g", true);
+                                        mBuilder = new NotificationCompat.Builder(context, "Channel 1")
+                                                .setSmallIcon(R.drawable.ic_add_sap_24dp)
+                                                .setContentTitle("Congratulations")
+                                                .setContentText("You saved 20 g CO2 walking the stairs.")
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                                    }
+                                    
+                                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+                                    if (mBuilder != null) {
+                                        notificationManager.notify(1, mBuilder.build());
                                     }
                                     scannedBeacons.add(deviceAddress);
                                 }
@@ -188,7 +222,29 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
         addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
 
+        Intent intent = new Intent(this, AlertDetails.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
+        createNotificationChannel();
+
+    }
+
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Main Channel";
+            String description = "Everything";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("Channel 1", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -245,7 +301,8 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     @Override
     protected void onPause() {
         super.onPause();
-        scanLeDevice(false);
+
+        scanLeDevice(true);
     }
 
     protected void onResume() {
@@ -361,4 +418,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         setIntent(intent);
     }
 
+    private class AlertDetails {
+    }
 }
