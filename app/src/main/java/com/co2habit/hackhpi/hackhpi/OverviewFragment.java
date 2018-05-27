@@ -57,25 +57,7 @@ public class OverviewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
-        //add mock data
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(2, 3));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(2, -1));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(4, 5));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(4, -3));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(6, 3));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(6, -1));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(8, 6));
-        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(8, -3));
-
-        ((MainActivity) getActivity()).series = getBarGraphMockData();
      }
-
-    public BarGraphSeries<DataPoint>  getBarGraphMockData(){
-        DataPoint[] points = new DataPoint[((MainActivity) getActivity()).mockPoints.size()];
-        points = ((MainActivity) getActivity()).mockPoints.toArray(points);
-        return new BarGraphSeries<>(points);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

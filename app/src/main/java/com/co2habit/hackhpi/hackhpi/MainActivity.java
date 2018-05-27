@@ -302,14 +302,41 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
         addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
 
+        //add mock data
+        this.mockPoints.add(new DataPoint(2, 3));
+        this.mockPoints.add(new DataPoint(2, -1));
+        this.mockPoints.add(new DataPoint(4, 5));
+        this.mockPoints.add(new DataPoint(4, -3));
+        this.mockPoints.add(new DataPoint(6, 3));
+        this.mockPoints.add(new DataPoint(6, -1));
+        this.mockPoints.add(new DataPoint(8, 6));
+        this.mockPoints.add(new DataPoint(8, -3));
+
+        this.series = getBarGraphMockData();
+
+
+
+
         Intent intent = new Intent(this, AlertDetails.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
 
         createNotificationChannel();
         handleIntent(getIntent());
 
     }
+
+
+    public BarGraphSeries<DataPoint>  getBarGraphMockData(){
+
+        DataPoint[] points = new DataPoint[this.mockPoints.size()];
+        points = this.mockPoints.toArray(points);
+        return new BarGraphSeries<>(points);
+
+    }
+
 
 
     private void createNotificationChannel() {
@@ -466,11 +493,20 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         String title = getString(R.string.app_name);
         String tag = "";
 
+        //skip if overview fragment is already there...
 
         if (id == R.id.nav_overview) {
+
+
+            Fragment currentlyActive = (OverviewFragment) getSupportFragmentManager().findFragmentByTag("overview");
+
+
             fragment = new OverviewFragment();
             title  = "Overview";
             tag = "overview";
+
+
+
         } else if (id == R.id.nav_history) {
             fragment = new HistoryFragment();
             title  = "History";
@@ -480,6 +516,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
             title  = "Statistics";
             tag = "statics";
         }
+
 
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
