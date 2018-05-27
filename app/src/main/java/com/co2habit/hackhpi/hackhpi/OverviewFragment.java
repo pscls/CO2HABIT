@@ -30,8 +30,6 @@ public class OverviewFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     int number = 4;
 
-    List<DataPoint> mockPoints = new ArrayList<DataPoint>();
-    BarGraphSeries<DataPoint> series;
     GraphView graph;
 
 
@@ -61,21 +59,21 @@ public class OverviewFragment extends Fragment {
         setRetainInstance(true);
 
         //add mock data
-        this.mockPoints.add(new DataPoint(2, 3));
-        this.mockPoints.add(new DataPoint(2, -1));
-        this.mockPoints.add(new DataPoint(4, 5));
-        this.mockPoints.add(new DataPoint(4, -3));
-        this.mockPoints.add(new DataPoint(6, 3));
-        this.mockPoints.add(new DataPoint(6, -1));
-        this.mockPoints.add(new DataPoint(8, 6));
-        this.mockPoints.add(new DataPoint(8, -3));
-        Log.w("Test","Create it!");
-        series = getBarGraphMockData();
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(2, 3));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(2, -1));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(4, 5));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(4, -3));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(6, 3));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(6, -1));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(8, 6));
+        ((MainActivity) getActivity()).mockPoints.add(new DataPoint(8, -3));
+
+        ((MainActivity) getActivity()).series = getBarGraphMockData();
      }
 
     public BarGraphSeries<DataPoint>  getBarGraphMockData(){
-        DataPoint[] points = new DataPoint[this.mockPoints.size()];
-        points = this.mockPoints.toArray(points);
+        DataPoint[] points = new DataPoint[((MainActivity) getActivity()).mockPoints.size()];
+        points = ((MainActivity) getActivity()).mockPoints.toArray(points);
         return new BarGraphSeries<>(points);
     }
 
@@ -98,13 +96,20 @@ public class OverviewFragment extends Fragment {
         graph.getViewport().setMinY(-4);
         graph.getViewport().setMaxY(7);
 
+        if ((((MainActivity) getActivity()).number == 5)){
+            graph.getViewport().setMinX(0);
+            graph.getViewport().setMaxX(12);
+            graph.getViewport().setMinY(-4);
+            graph.getViewport().setMaxY(8);
+        }
+
         graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         graph.getGridLabelRenderer().setVerticalLabelsVisible(false);
 
-        graph.addSeries(series);
+        graph.addSeries(((MainActivity) getActivity()).series);
         graph.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
 
-        applyStyling(series);
+        applyStyling(((MainActivity) getActivity()).series);
 
        /*
         appendLastDataSet(8, -3);
@@ -158,30 +163,6 @@ public class OverviewFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
-    }
-
-    public void appendLastDataSet(int y_o, int y_u){
-        if(this.number == 4) {
-            series.appendData(new DataPoint(10, y_o), false, 30);
-            series.appendData(new DataPoint(10, y_u), false, 30);
-            this.number++;
-        }else{
-
-            //copy global mockPoints
-            List<DataPoint> localMockPoints = new ArrayList<DataPoint>(this.mockPoints);
-            localMockPoints.add(new DataPoint(10, y_o));
-            localMockPoints.add(new DataPoint(10, y_u));
-            DataPoint[] points = new DataPoint[localMockPoints.size()];
-            points = localMockPoints.toArray(points);
-
-            series.resetData(points);
-        }
-
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(12);
-        graph.getViewport().setMinY(-4);
-        graph.getViewport().setMaxY(8);
-
     }
 
     @Override
