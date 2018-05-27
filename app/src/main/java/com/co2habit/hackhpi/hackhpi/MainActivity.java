@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.net.Uri;
@@ -297,8 +298,8 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         }
 
         //setup history data
-        addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
-        addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
+        addToList("Used Stairs", "26-04-2018", "-5 g" , true);
+        addToList("Used Car", "28-04-2018", "+25 g" , false);
 
         //add mock data
         this.mockPoints.add(new DataPoint(2, 3));
@@ -311,7 +312,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         this.mockPoints.add(new DataPoint(8, -3));
 
         this.series = getBarGraphMockData();
-
 
 
 

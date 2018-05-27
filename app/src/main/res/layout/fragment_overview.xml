@@ -13,12 +13,13 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="168dp"
-            android:layout_height="35dp"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="39dp"
             android:text="Your Overview"
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
+            android:textSize="25.5sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/graph" />
 
@@ -34,7 +35,7 @@
             android:layout_width="360dp"
             android:layout_height="160dp"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="63dp"
             android:stretchColumns="*"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2">
@@ -59,6 +60,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:text="used"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -69,6 +71,7 @@
                     android:ems="10"
                     android:inputType="textPersonName"
                     android:text="saved"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
             </TableRow>
@@ -86,7 +89,8 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:text="April 2018"
+                    android:text="02 / 18"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -96,7 +100,8 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:text="212"
-                    android:textColor="@color/badRed" />
+                    android:textColor="@color/badRed"
+                    android:textSize="15.8sp" />
 
                 <TextView
                     android:id="@+id/overviewT13"
@@ -104,8 +109,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:ems="10"
+                    android:text="100"
                     android:textColor="@color/goodGreen"
-                    android:text="100" />
+                    android:textSize="15.8sp" />
 
             </TableRow>
 
@@ -121,7 +127,8 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:text="März 2018"
+                    android:text="03 / 18"
+                    android:textSize="15.8sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -130,8 +137,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:ems="10"
+                    android:text="320"
                     android:textColor="@color/badRed"
-                    android:text="320" />
+                    android:textSize="15.8sp" />
 
                 <TextView
                     android:id="@+id/overviewT23"
@@ -139,8 +147,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:ems="10"
+                    android:text="240"
                     android:textColor="@color/goodGreen"
-                    android:text="240" />
+                    android:textSize="15.8sp" />
 
             </TableRow>
 
@@ -157,7 +166,8 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:text="Februar 2018"
+                    android:text="04 / 18"
+                    android:textSize="15.8sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -166,8 +176,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:ems="10"
+                    android:text="120"
                     android:textColor="@color/badRed"
-                    android:text="120" />
+                    android:textSize="15.8sp" />
 
                 <TextView
                     android:id="@+id/overviewT33"
@@ -175,8 +186,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:ems="10"
+                    android:text="303"
                     android:textColor="@color/goodGreen"
-                    android:text="303" />
+                    android:textSize="15.8sp" />
 
             </TableRow>
         </TableLayout>

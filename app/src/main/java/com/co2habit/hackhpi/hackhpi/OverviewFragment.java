@@ -137,7 +137,7 @@ public class OverviewFragment extends Fragment {
         series.setSpacing(50);
         // draw values on top
         series.setDrawValuesOnTop(true);
-        series.setValuesOnTopColor(Color.BLUE);
+        series.setValuesOnTopColor(Color.GRAY);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
