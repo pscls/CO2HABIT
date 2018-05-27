@@ -3,6 +3,8 @@ package com.co2habit.hackhpi.hackhpi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -20,7 +22,6 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -43,6 +44,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+
+//ToDo:
+//
+// App im Background --> Daten gehen verloren :(
+// Refactor Overview Fragment --> Use Main Activity
+//
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HistoryFragment.OnFragmentInteractionListener, AddEntryFragment.OnFragmentInteractionListener,
 OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInteractionListener {
@@ -62,6 +70,8 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     private final String bikestation = "F4:F0:22:16:FD:C3"; // Sihf
     private final String carport = "CD:A2:4C:60:37:C8"; // JTUJ
 
+    NfcAdapter mNfcAdapter;
+
     private final String[] beaconArray = {"C3:FC:67:A9:54:C7", "CE:92:BD:85:DF:44", "C9:C8:7C:99:3E:FD", "CD:A2:4C:60:37:C8", "F4:F0:22:16:FD:C3"}; /*"C2:0D:F5:3D:BE:72",*/
     private final ArrayList<String> beacons = new ArrayList<>(Arrays.asList(beaconArray));
     ArrayList<String> scannedBeacons = new ArrayList<>();
@@ -76,7 +86,20 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     private static final long SCAN_PERIOD = 100000;
 
     //Public Fields for Fragments!
-    public List<HashMap<String, Object>> fillMaps = new ArrayList<>();
+    public ArrayList<HashMap<String, Object>> fillMaps = new ArrayList<>();
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("message", fillMaps);
+    }
+
+    private void restore(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            fillMaps = (ArrayList<HashMap<String, Object>>) savedInstanceState.getSerializable("message");
+        }
+    }
+
 
     //public method to add new elements to the list
     public void addToList(String title, String fDescr, String sDescri, boolean status){
@@ -97,6 +120,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         fillMaps.add(0,map);
 
         HistoryFragment history  = (HistoryFragment) getSupportFragmentManager().findFragmentByTag("history");
+
         if(history != null){
             history.mListView.invalidateViews();
         }
@@ -161,7 +185,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                                                 .setContentText("You saved 20 g CO2 walking the stairs.")
                                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
                                     }
-                                    
+
                                     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
                                     if (mBuilder != null) {
                                         notificationManager.notify(1, mBuilder.build());
@@ -184,10 +208,20 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        restore(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        if (mNfcAdapter == null) {
+            // Stop here, we definitely need NFC
+            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
+            //finish();
+            return;
+
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -227,6 +261,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         createNotificationChannel();
+        handleIntent(getIntent());
 
     }
 
@@ -303,20 +338,49 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         super.onPause();
 
         scanLeDevice(true);
+        stopForegroundDispatch(this, mNfcAdapter);
+    }
+
+    public static void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
+        final Intent intent = new Intent(activity, activity.getClass());
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        final PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
+        adapter.enableForegroundDispatch(activity, pendingIntent, null, null);
+    }
+
+    public static void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
+        adapter.disableForegroundDispatch(activity);
     }
 
     protected void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
+        setupForegroundDispatch(this, mNfcAdapter);
 
-        if(intent != null)
-            Log.d("1", " " + intent.toString());
+        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
+        // fire an intent to display a dialog asking the user to grant permission to enable it.
 
-        if (intent != null && NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+        if (!mBluetoothAdapter.isEnabled()) {
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
+            }
+        }
+
+        //Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
+
+        scanLeDevice(true);
+
+    }
+
+    public void handleIntent(Intent intent){
+
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
             Parcelable[] rawMessages =
                     intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
             if (rawMessages != null) {
+
                 NdefMessage[] messages = new NdefMessage[rawMessages.length];
                 for (int i = 0; i < rawMessages.length; i++) {
                     messages[i] = (NdefMessage) rawMessages[i];
@@ -336,22 +400,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                 // Process the messages array.
             }
         }
-
-
-
-        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-
-        if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, 1);
-            }
-        }
-
-        //Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
-
-        scanLeDevice(true);
 
     }
 
@@ -415,7 +463,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
     @Override
     public void onNewIntent(Intent intent) {
-        setIntent(intent);
+        handleIntent(intent);
     }
 
     private class AlertDetails {

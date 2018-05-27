@@ -58,6 +58,7 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
 
         //add mock data
         this.mockPoints.add(new DataPoint(2, 3));
@@ -68,6 +69,8 @@ public class OverviewFragment extends Fragment {
         this.mockPoints.add(new DataPoint(6, -1));
         this.mockPoints.add(new DataPoint(8, 6));
         this.mockPoints.add(new DataPoint(8, -3));
+        Log.w("Test","Create it!");
+        series = getBarGraphMockData();
      }
 
     public BarGraphSeries<DataPoint>  getBarGraphMockData(){
@@ -86,8 +89,6 @@ public class OverviewFragment extends Fragment {
         //GUI code here
 
         graph = (GraphView) view.findViewById(R.id.graph);
-        series = getBarGraphMockData();
-
 
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
@@ -99,7 +100,6 @@ public class OverviewFragment extends Fragment {
 
         graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         graph.getGridLabelRenderer().setVerticalLabelsVisible(false);
-
 
         graph.addSeries(series);
         graph.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
