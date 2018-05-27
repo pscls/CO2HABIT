@@ -103,7 +103,7 @@ public class OverviewFragment extends Fragment {
         applyStyling(series);
 
 
-        final Handler handler = new Handler();
+       /* final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -118,11 +118,7 @@ public class OverviewFragment extends Fragment {
                 }, 2000);
 
             }
-        }, 3000);
-
-
-
-        Log.w("test", "hallo" + "");
+        }, 3000);*/
 
         // Inflate the layout for this fragment
         return view;
