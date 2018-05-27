@@ -3,14 +3,11 @@ package com.co2habit.hackhpi.hackhpi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -32,7 +29,8 @@ public class HistoryFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    List<HashMap<String, Object>> fillMaps;
+    ListView mListView;
+
     SimpleAdapter adapter;
     int smileUnicode = 0x1F60A;
     int sadUnicode = 0x1F641;
@@ -78,10 +76,13 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        this.setRetainInstance(true);
+
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_history, container, false);
 
-        ListView mListView = (ListView) view.findViewById(R.id.listView);
+        mListView = (ListView) view.findViewById(R.id.listView);
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -96,14 +97,7 @@ public class HistoryFragment extends Fragment {
         String[] from = new String[] { "title", "firstDescription", "secondDescription", "colorStatus" };
         int[] to = new int[] { R.id.title, R.id.firstDescription, R.id.secondDescription, R.id.colorStatus };
 
-
-        fillMaps = new ArrayList<>();
-
-        addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
-        addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
-
-
-        adapter = new SimpleAdapter(getActivity(), fillMaps, R.layout.row, from, to);
+        adapter = new SimpleAdapter(getActivity(), ((MainActivity) getActivity()).fillMaps, R.layout.row, from, to);
         mListView.setAdapter(adapter);
 
         return view;
@@ -125,7 +119,7 @@ public class HistoryFragment extends Fragment {
 
         }
 
-        fillMaps.add(map);
+        ((MainActivity) getActivity()).fillMaps.add(map);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
