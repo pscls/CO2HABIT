@@ -1,5 +1,6 @@
 package com.co2habit.hackhpi.hackhpi;
 
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +10,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
@@ -400,7 +402,17 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("HackHPI 2018");
+            alertDialog.setMessage("This App was hacked at Hackathon 2018 for the SAP Challenge from: \n\nTill, Pascal, Nick, David.\n\n" +
+                    "With a lot of support from Coffein and Melina. ");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
 
         return super.onOptionsItemSelected(item);
