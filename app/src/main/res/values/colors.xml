@@ -5,4 +5,6 @@
     <color name="colorAccent">#1976d2</color>
     <color name="goodGreen">#13EA64</color>
     <color name="badRed">#FF4438</color>
+    <color name="white">#FFFFFF</color>
+
 </resources>

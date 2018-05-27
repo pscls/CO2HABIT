@@ -13,10 +13,6 @@
             android:icon="@drawable/ic_history_sap_24dp"
             android:title="History" />
         <item
-            android:id="@+id/nav_addEntry"
-            android:icon="@drawable/ic_add_sap_24dp"
-            android:title="Add Entry" />
-        <item
             android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_show_chart_sap_24dp"
             android:title="Statistics" />

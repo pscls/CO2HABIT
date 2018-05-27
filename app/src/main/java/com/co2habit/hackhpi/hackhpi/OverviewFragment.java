@@ -31,6 +31,8 @@ public class OverviewFragment extends Fragment {
     int number = 4;
 
     List<DataPoint> mockPoints = new ArrayList<DataPoint>();
+    BarGraphSeries<DataPoint> series;
+    GraphView graph;
 
 
     public OverviewFragment() {
@@ -68,6 +70,12 @@ public class OverviewFragment extends Fragment {
         this.mockPoints.add(new DataPoint(8, -3));
      }
 
+    public BarGraphSeries<DataPoint>  getBarGraphMockData(){
+        DataPoint[] points = new DataPoint[this.mockPoints.size()];
+        points = this.mockPoints.toArray(points);
+        return new BarGraphSeries<>(points);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -77,12 +85,8 @@ public class OverviewFragment extends Fragment {
 
         //GUI code here
 
-        final GraphView graph = (GraphView) view.findViewById(R.id.graph);
-
-        DataPoint[] points = new DataPoint[this.mockPoints.size()];
-        points = this.mockPoints.toArray(points);
-
-        final BarGraphSeries<DataPoint> series = new BarGraphSeries<>(points);
+        graph = (GraphView) view.findViewById(R.id.graph);
+        series = getBarGraphMockData();
 
 
         graph.getViewport().setXAxisBoundsManual(true);
@@ -102,8 +106,12 @@ public class OverviewFragment extends Fragment {
 
         applyStyling(series);
 
+       /*
+        appendLastDataSet(8, -3);
+        appendLastDataSet(5, -1);
 
-       /* final Handler handler = new Handler();
+
+        final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -152,20 +160,21 @@ public class OverviewFragment extends Fragment {
         }
     }
 
-    public void appendLastDataSet(BarGraphSeries<DataPoint> data, GraphView graph){
+    public void appendLastDataSet(int y_o, int y_u){
         if(this.number == 4) {
-            data.appendData(new DataPoint(10, 5), false, 30);
+            series.appendData(new DataPoint(10, y_o), false, 30);
+            series.appendData(new DataPoint(10, y_u), false, 30);
             this.number++;
         }else{
 
             //copy global mockPoints
             List<DataPoint> localMockPoints = new ArrayList<DataPoint>(this.mockPoints);
-            localMockPoints.add(new DataPoint(10, 6));
-
+            localMockPoints.add(new DataPoint(10, y_o));
+            localMockPoints.add(new DataPoint(10, y_u));
             DataPoint[] points = new DataPoint[localMockPoints.size()];
             points = localMockPoints.toArray(points);
 
-            data.resetData(points);
+            series.resetData(points);
         }
 
         graph.getViewport().setMinX(0);

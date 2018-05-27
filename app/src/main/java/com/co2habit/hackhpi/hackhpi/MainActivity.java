@@ -6,22 +6,20 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
+
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -30,13 +28,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HistoryFragment.OnFragmentInteractionListener, AddEntryFragment.OnFragmentInteractionListener,
@@ -63,10 +62,44 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     private boolean mScanning;
     private Handler mHandler;
 
+    int smileUnicode = 0x1F60A;
+    int sadUnicode = 0x1F641;
+
+
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 100000;
 
+    //Public Fields for Fragments!
+    public List<HashMap<String, Object>> fillMaps = new ArrayList<>();
 
+    //public method to add new elements to the list
+    public void addToList(String title, String fDescr, String sDescri, boolean status){
+
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("title", title); // This will be shown in R.id.title
+        map.put("firstDescription", fDescr); // And this in R.id.description
+        map.put("secondDescription", sDescri);
+
+        if(status){
+            map.put("colorStatus", new String(Character.toChars(smileUnicode)));
+        }else{
+            map.put("colorStatus", new String(Character.toChars(sadUnicode)));
+
+        }
+
+        fillMaps.add(0,map);
+
+        HistoryFragment history  = (HistoryFragment) getSupportFragmentManager().findFragmentByTag("history");
+        if(history != null){
+            history.mListView.invalidateViews();
+        }
+    }
+
+    public void executeFragmentCode(String text){
+
+
+    }
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
@@ -76,19 +109,28 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                         public void run() {
                             final String deviceAddress = device.getAddress();
                             if (beacons.contains(deviceAddress) && rssi > -80) {
+                                Date c = Calendar.getInstance().getTime();
+                                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                                String formattedDate = df.format(c);
+
                                 if (scannedBeacons.size() == 0 || !scannedBeacons.get(scannedBeacons.size() - 1).equals(deviceAddress)) {
                                     if (deviceAddress.equals(elevator)) {
                                         // add Elevator
-                                        Toast.makeText(context, "Elevator! :(", Toast.LENGTH_LONG).show();
+                                        //Toast.makeText(context, "Elevator! :(", Toast.LENGTH_LONG).show();
+                                        addToList("Used Elevator", formattedDate, "20g", false);
+
                                     } else if (deviceAddress.equals(bikestation)) {
                                         // add bikestation
-                                        Toast.makeText(context, "Bikestation! :)", Toast.LENGTH_LONG).show();
+                                        //Toast.makeText(context, "Bikestation! :)", Toast.LENGTH_LONG).show();
+                                        addToList("Used Bike", formattedDate, "-20g", true);
                                     } else if (deviceAddress.equals(carport)) {
                                         // add Carport
-                                        Toast.makeText(context, "Carport! :(", Toast.LENGTH_LONG).show();
+                                        //Toast.makeText(context, "Carport! :(", Toast.LENGTH_LONG).show();
+                                        addToList("Used Car", formattedDate, "140g", false);
                                     } else if (scannedBeacons.size() > 0 && (scannedBeacons.get(scannedBeacons.size() - 1).equals(downstairs) && deviceAddress.equals(upstairs) || scannedBeacons.get(scannedBeacons.size() - 1).equals(upstairs) && deviceAddress.equals(downstairs))) {
                                         // add Stairs
-                                        Toast.makeText(context, "Stairs! :)", Toast.LENGTH_LONG).show();
+                                        //Toast.makeText(context, "Stairs! :)", Toast.LENGTH_LONG).show();
+                                        addToList("Used Stairs", formattedDate, "-20g", true);
                                     }
                                     scannedBeacons.add(deviceAddress);
                                 }
@@ -112,14 +154,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -149,6 +183,11 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                 startActivityForResult(enableBtIntent, 1);
             }
         }
+
+        //setup history data
+        addToList("Used Stairs", "26.04.2018 18:30", "-5 g" , true);
+        addToList("Used Car", "28.04.2018 7:30", "+25 g" , false);
+
 
     }
 
@@ -206,7 +245,6 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
     @Override
     protected void onPause() {
         super.onPause();
-        Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
         scanLeDevice(false);
     }
 
@@ -227,10 +265,16 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
                     messages[i] = (NdefMessage) rawMessages[i];
                 }
 
+                Date c = Calendar.getInstance().getTime();
+                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                String formattedDate = df.format(c);
+
                 if (messages[0].getRecords()[0].getPayload()[3] == 65) {
                     // Add Essen A
+                    addToList("Meal A (Steak)", formattedDate, "140g", false);
                 } else if (messages[0].getRecords()[0].getPayload()[3] == 66) {
                     // Add Essen B
+                    addToList("Meal B (Veggie)", formattedDate, "140g", false);
                 }
                 // Process the messages array.
             }
@@ -250,7 +294,7 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
         //Toast.makeText(this, "Start LE Scan", Toast.LENGTH_SHORT).show();
 
-        scanLeDevice(false);
+        scanLeDevice(true);
 
     }
 
@@ -267,26 +311,32 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
 
         Fragment fragment = null;
         String title = getString(R.string.app_name);
+        String tag = "";
+
 
         if (id == R.id.nav_overview) {
             fragment = new OverviewFragment();
             title  = "Overview";
-        } else if (id == R.id.nav_addEntry) {
-            fragment = new AddEntryFragment();
-            title  = "Add Entry";
+            tag = "overview";
         } else if (id == R.id.nav_history) {
             fragment = new HistoryFragment();
             title  = "History";
+            tag = "history";
         } else if (id == R.id.nav_statistics) {
             fragment = new StatisticsFragment();
             title  = "Statistics";
+            tag = "statics";
         }
 
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.drawer_layout2, fragment);
+            ft.replace(R.id.drawer_layout2, fragment, tag);
+            ft.addToBackStack(tag);
+
             ft.commit();
         }
+
+
 
         // set the toolbar title
         if (getSupportActionBar() != null) {
@@ -300,6 +350,8 @@ OverviewFragment.OnFragmentInteractionListener, StatisticsFragment.OnFragmentInt
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             //finish();
         }
+
+
     }
 
     public void onFragmentInteraction(Uri uri) { }
